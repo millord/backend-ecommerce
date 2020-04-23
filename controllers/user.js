@@ -4,7 +4,7 @@ exports.userById = (req, res, next, id) => {
   User.findById(id).exec((err, user) => {
     if (err || !user) {
       return res.status(400).json({
-        error: "User not found"
+        error: "User not found",
       });
     }
     req.profile = user;
@@ -26,11 +26,40 @@ exports.update = (req, res) => {
     (err, user) => {
       if (err) {
         return res.status(400).json({
-          error: "You are not authorized to perform this action"
+          error: "You are not authorized to perform this action",
         });
       }
       user.hashed_password = undefined;
       (user.salt = undefined), res.json(user);
+    }
+  );
+};
+
+exports.addOrderToUserHistory = (req, res, next) => {
+  let history = [];
+
+  req.body.order.products.forEach((item) => {
+    history.push({
+      _id: item.name,
+      name: item.name,
+      description: item.description,
+      category: item.category,
+      quantity: item.count,
+      transaction_id: req.body.order.transaction_id,
+      amount: req.body.order.amount,
+    });
+  });
+  User.findOneAndUpdate(
+    { _id: req.profile._id },
+    { $push: { history: history } },
+    { new: true },
+    (err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Could not Update user Purchase history",
+        });
+      }
+      next();
     }
   );
 };
