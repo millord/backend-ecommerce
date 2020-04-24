@@ -7,7 +7,7 @@ const { requiredSignin, isAuth, isAdmin } = require("../controllers/auth");
 
 router.get("/secret/:userId", requiredSignin, isAuth, isAdmin, (req, res) => {
   res.json({
-    user: req.profile
+    user: req.profile,
   });
 });
 
